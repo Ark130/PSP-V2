@@ -194,7 +194,7 @@ class TimeTracker:
         footer_frame.pack(side="bottom", fill="x", padx=10, pady=5)
 
         # Etiqueta en el lado izquierdo del footer
-        footer_label = tk.Label(footer_frame, text="Activity Manager v.0.9.9", font=("Arial", 10, "bold"), fg="black", cursor="hand2")
+        footer_label = tk.Label(footer_frame, text="Activity Manager Versión Testing", font=("Arial", 10, "bold"), fg="black", cursor="hand2")
         footer_label.pack(side="left")
         
         # Checkbutton en el lado derecho para "Always on Top"
