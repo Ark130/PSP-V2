@@ -238,7 +238,7 @@ class TimeTracker:
         self.formulario_window.title("Formulario")
         self.formulario_window.resizable(False, False)
         # Ensanchar la ventana (por ejemplo, 1000px de ancho y 600px de alto)
-        self.formulario_window.geometry("1000x600")
+        self.formulario_window.geometry("1100x600")
 
 
         # Frame contenedor con borde negro, pegado al borde superior e izquierdo
@@ -284,7 +284,9 @@ class TimeTracker:
         counter_frame = tk.Frame(self.formulario_window)
         # Se posiciona al borde superior derecho (relx=1.0, y=0, con anclaje al noreste)
         counter_frame.place(relx=1.0, x=-150 ,y=80, anchor="ne")
-        self.defecto_timer_label = tk.Label(counter_frame, text="00:00:00", font=("Arial", 24))
+        # Encabezado para el cronómetro
+        tk.Label(counter_frame, text="CRONÓMETRO", font=("Arial", 16, "bold")).pack()
+        self.defecto_timer_label = tk.Label(counter_frame, text="00:00:00", font=("Arial", 24, "bold"))
         self.defecto_timer_label.pack(pady=10)
         # Guardar el tiempo de inicio y activar la actualización del contador
         self.defecto_timer_start = time.time()
@@ -335,52 +337,89 @@ class TimeTracker:
         tk.Label(prog_frame, text="PROGRAMA #: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(prog_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
-        # Encabezados de columnas para el registro de defectos
+        # Modificar el header para usar grid, asignando un mismo peso Y uniformidad a cada columna
         headers_frame = tk.Frame(self.formulario_window)
-        headers_frame.pack(fill="x", pady=(10,0))
+        headers_frame.pack(fill="x", pady=(10, 0))
         headers = ["Fecha", "Número", "Tipo", "Encontrado", "Removido", "Tiempo de compostura", "Defecto Arreglado"]
-        for header in headers:
-            tk.Label(headers_frame, text=header, font=("Arial", 10, "bold"), anchor="center")\
-            .pack(side="left", expand=True, fill="x")
+        for i, header in enumerate(headers):
+            lbl = tk.Label(headers_frame, 
+                        text=header, 
+                        font=("Arial", 10, "bold"), 
+                        anchor="center", 
+                        bg="black", 
+                        fg="white")
+            lbl.grid(row=0, column=i, sticky="nsew", padx=1)
+            headers_frame.columnconfigure(i, weight=1, uniform="col")
 
         # --- NUEVA SECCIÓN: Campos para registro de defectos ---
         details_frame = tk.Frame(self.formulario_window)
-        details_frame.pack(fill="x", pady=(10,0))
-        # Fecha: se obtiene en formato corto desde el momento de presionar "Formulario"
+        details_frame.pack(fill="x", pady=(10, 0))
+
+        # Configuramos 7 columnas con el mismo peso y forzamos que sean del mismo ancho
+        for col in range(7):
+            details_frame.columnconfigure(col, weight=1, uniform="col")
+
+        # Columna 0: Fecha
         fecha_detalle = datetime.datetime.now().strftime("%d/%m/%Y")
-        tk.Label(details_frame, text=fecha_detalle, font=("Arial", 10), anchor="center")\
-        .pack(side="left", expand=True, fill="x")
-        # Número: autoincrementable (se muestra "1" en este ejemplo)
-        tk.Label(details_frame, text="1", font=("Arial", 10), anchor="center")\
-        .pack(side="left", expand=True, fill="x")
-        # Tipo: combobox con opciones numéricas
+        tk.Label(details_frame, 
+                text=fecha_detalle, 
+                font=("Arial", 10), 
+                anchor="center")\
+            .grid(row=0, column=0, sticky="nsew", padx=1)
+
+        # Columna 1: Número (autoincrementable, se muestra "1" en este ejemplo)
+        tk.Label(details_frame, 
+                text="1", 
+                font=("Arial", 10), 
+                anchor="center")\
+            .grid(row=0, column=1, sticky="nsew", padx=1)
+
+        # Columna 2: Tipo (Combobox de opciones numéricas)
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
-        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10), width=2)
+        tipo_cb = ttk.Combobox(details_frame, 
+                            values=tipo_values, 
+                            state="readonly", 
+                            font=("Arial", 10), 
+                            width=2,
+                            justify="center")
         tipo_cb.current(0)
-        tipo_cb.pack(side="left", padx=5, pady=2)
-        # Encontrado: combobox con opciones de actividad
+        tipo_cb.grid(row=0, column=2, sticky="nsew", padx=5, pady=2)
+
+        # Columna 3: Encontrado (Combobox de opciones de actividad)
         encontrado_values = ["Planificación", "Análisis", "Codificación", "Pruebas",
                             "Lanzamiento", "Revisión", "Revisión de código", "Diagramar", "Reunión"]
-        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10), width=2)
+        encontrado_cb = ttk.Combobox(details_frame, 
+                                    values=encontrado_values, 
+                                    state="readonly", 
+                                    font=("Arial", 10),
+                                    justify="center", 
+                                    width=2)
         encontrado_cb.current(0)
-        encontrado_cb.pack(side="left", expand=True, fill="x")
-        # Removido: campo de entrada
+        encontrado_cb.grid(row=0, column=3, sticky="nsew", padx=1)
+
+        # Columna 4: Removido (Campo de entrada)
         removido_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
-        removido_entry.pack(side="left", expand=True, fill="x")
-        # Tiempo de compostura: campo de entrada
+        removido_entry.grid(row=0, column=4, sticky="nsew", padx=1)
+
+        # Columna 5: Tiempo de compostura (Campo de entrada)
         tiempo_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
-        tiempo_entry.pack(side="left", expand=True, fill="x")
-        # Defecto Arreglado: dos checkbuttons en un frame interno
+        tiempo_entry.grid(row=0, column=5, sticky="nsew", padx=1)
+
+        # Columna 6: Defecto Arreglado (Frame interno para contener los radiobuttons)
         defecto_frame = tk.Frame(details_frame)
-        defecto_frame.pack(side="left", expand=True, fill="x")
-        # Defecto Arreglado: dos radiobuttons en un frame interno
-        defecto_var = tk.StringVar()  # Variable compartida para que sean mutuamente excluyentes
+        defecto_frame.grid(row=0, column=6, sticky="nsew", padx=1)
+        # Para que también se expanda el frame interno, podemos configurar su grid uniformemente
+        for col in range(2):
+            defecto_frame.columnconfigure(col, weight=1, uniform="col")
+            
+        # En lugar de pack, usamos grid para que queden alineados con el resto
+        defecto_var = tk.StringVar()  # Variable para exclusión mutua
         defecto_rojo_rb = tk.Radiobutton(defecto_frame, text="NO", variable=defecto_var,
                                         value="Rojo", font=("Arial", 10, "bold"), fg="red")
-        defecto_rojo_rb.pack(side="left", padx=5)
+        defecto_rojo_rb.grid(row=0, column=0, sticky="nsew", padx=5)
         defecto_verde_rb = tk.Radiobutton(defecto_frame, text="SI", variable=defecto_var,
                                         value="SI", font=("Arial", 10, "bold"), fg="green")
-        defecto_verde_rb.pack(side="left", padx=5)
+        defecto_verde_rb.grid(row=0, column=1, sticky="nsew", padx=5)
 
         # Se agrega el texto "DESCRIPCIÓN" debajo de los campos anteriores
         tk.Label(self.formulario_window, text="DESCRIPCIÓN", font=("Arial", 10, "bold"), anchor="w")\
