@@ -341,13 +341,13 @@ class TimeTracker:
         .pack(side="left", expand=True, fill="x")
         # Tipo: combobox con opciones numéricas
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
-        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10), width=1)
+        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10))
         tipo_cb.current(0)
         tipo_cb.pack(side="left", expand=True, fill="x")
         # Encontrado: combobox con opciones de actividad
         encontrado_values = ["Planificación", "Análisis", "Codificación", "Pruebas",
                             "Lanzamiento", "Revisión", "Revisión de código", "Diagramar", "Reunión"]
-        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10), width=2)
+        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10))
         encontrado_cb.current(0)
         encontrado_cb.pack(side="left", expand=True, fill="x")
         # Removido: campo de entrada
@@ -362,11 +362,24 @@ class TimeTracker:
         # Variables booleanas para los checkbuttons
         defecto_rojo_var = tk.BooleanVar()
         defecto_verde_var = tk.BooleanVar()
-        defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="Rojo", variable=defecto_rojo_var,
-                                        font=("Arial", 10), fg="red", selectcolor="red")
+
+        def toggle_rojo():
+            if defecto_rojo_var.get():
+                defecto_rojo_cb.config(bg="red", fg="white")
+            else:
+                defecto_rojo_cb.config(bg="SystemButtonFace", fg="black")
+
+        def toggle_verde():
+            if defecto_verde_var.get():
+                defecto_verde_cb.config(bg="green", fg="white")
+            else:
+                defecto_verde_cb.config(bg="SystemButtonFace", fg="black")
+
+        defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="No", variable=defecto_rojo_var,
+                                        font=("Arial", 10), indicatoron=0, width=5, command=toggle_rojo)
         defecto_rojo_cb.pack(side="left", padx=5)
-        defecto_verde_cb = tk.Checkbutton(defecto_frame, text="Verde", variable=defecto_verde_var,
-                                        font=("Arial", 10), fg="green", selectcolor="green")
+        defecto_verde_cb = tk.Checkbutton(defecto_frame, text="Si", variable=defecto_verde_var,
+                                        font=("Arial", 10), indicatoron=0, width=5, command=toggle_verde)
         defecto_verde_cb.pack(side="left", padx=5)
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
