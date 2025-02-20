@@ -240,9 +240,13 @@ class TimeTracker:
         # Ensanchar la ventana (por ejemplo, 1000px de ancho y 600px de alto)
         self.formulario_window.geometry("1000x600")
 
-        # Frame contenedor con borde negro, pegado al borde superior e izquierdo
-        border_frame = tk.Frame(self.formulario_window, bd=2, relief="solid")
-        border_frame.pack(anchor="nw", padx=20, pady=(0,20))
+        # Crear un contenedor para ambos recuadros
+        recuadros_frame = tk.Frame(self.formulario_window)
+        recuadros_frame.pack(anchor="nw", padx=20, pady=(0,20))
+
+        # Recuadro izquierdo: TIPOS DE DEFECTOS (código existente)
+        border_frame = tk.Frame(recuadros_frame, bd=2, relief="solid")
+        border_frame.pack(side="left", padx=(0,10))
 
         # Título centrado
         title_label = tk.Label(border_frame, text="TIPOS DE DEFECTOS", font=("Arial", 12, "bold"))
@@ -277,6 +281,13 @@ class TimeTracker:
         ]
         for item in defects_col2:
             tk.Label(col2, text=item, font=("Arial", 10), anchor="w").pack(pady=1, fill="x")
+
+        # Recuadro derecho: se crea uno de las mismas dimensiones (para ahora mostrar texto de marcador)
+        other_frame = tk.Frame(recuadros_frame, bd=2, relief="solid", width=border_frame.winfo_reqwidth(), height=border_frame.winfo_reqheight())
+        other_frame.pack(side="left", padx=(10,0))
+        other_frame.pack_propagate(False)  # Evita que se redimensione automáticamente
+        tk.Label(other_frame, text="OTRO RECUADRO", font=("Arial", 12, "bold")).pack(pady=10)
+
 
         # Debajo del recuadro negro, se inserta el siguiente texto centrado
         tk.Label(self.formulario_window, 
