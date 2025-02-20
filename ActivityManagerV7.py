@@ -368,11 +368,18 @@ class TimeTracker:
             .grid(row=0, column=0, sticky="nsew", padx=1)
 
         # Columna 1: Número (autoincrementable, se muestra "1" en este ejemplo)
+        # Cargar defectos y calcular el siguiente número para el proyecto
+        defectos = self.load_defectos()
+        if self.project in defectos:
+            contador = sum(1 for d in defectos[self.project].values() if isinstance(d, dict))
+        else:
+            contador = 0
+        numero = str(contador + 1)
         tk.Label(details_frame, 
-                text="1", 
+                text=numero, 
                 font=("Arial", 10), 
                 anchor="center")\
-            .grid(row=0, column=1, sticky="nsew", padx=1)
+        .grid(row=0, column=1, sticky="nsew", padx=1)
 
         # Columna 2: Tipo (Combobox de opciones numéricas)
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
@@ -451,7 +458,7 @@ class TimeTracker:
             tiempo_compostura = self.tiempo_label.cget("text")
             defecto_arreglado = defecto_var.get()
             descripcion = descripcion_text.get("1.0", tk.END).strip()
-            # El nombre del proyecto se almacena en "Proyecto:"
+            # El nombre del proyecto se almacena en "proyecto"
             proyecto = self.project
             # Recuperar el alumno y el profesor de la GUI principal
             alumno_val = self.alumno_entry.get()
@@ -459,8 +466,12 @@ class TimeTracker:
 
             # Cargar los defectos existentes desde Defectos.json
             defectos = self.load_defectos()
-            # Calcular el número (autoincrementable) basado en los registros del proyecto actual
-            contador = sum(1 for d in defectos.values() if isinstance(d, dict) and d.get("Proyecto:") == proyecto)
+            # Si aún no existe el proyecto en defectos, lo inicializamos
+            if proyecto not in defectos:
+                defectos[proyecto] = {}
+
+            # Calcular el número (autoincrementable) para este proyecto
+            contador = sum(1 for d in defectos[proyecto].values() if isinstance(d, dict))
             numero = str(contador + 1)
 
             nuevo_defecto = {
@@ -472,13 +483,13 @@ class TimeTracker:
                 "Tiempo de compostura": tiempo_compostura,
                 "Defecto Arreglado": defecto_arreglado,
                 "Descripción": descripcion,
-                "Proyecto:": proyecto,
                 "Alumno": alumno_val,
                 "Profesor": profesor_val
             }
             # Generar una nueva clave única (por ejemplo, usando el timestamp)
-            nueva_clave = f"{proyecto}_{int(time.time())}"
-            defectos[nueva_clave] = nuevo_defecto
+            nueva_clave = str(int(time.time()))
+            defectos[proyecto][nueva_clave] = nuevo_defecto
+
             with open(DEFECTOS_FILE, "w", encoding="utf-8") as file:
                 json.dump(defectos, file, ensure_ascii=False, indent=4)
             messagebox.showinfo("Guardado", "Defecto guardado en Defectos.json")
