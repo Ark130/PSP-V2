@@ -277,6 +277,12 @@ class TimeTracker:
         ]
         for item in defects_col2:
             tk.Label(col2, text=item, font=("Arial", 10), anchor="w").pack(pady=1, fill="x")
+            
+            # Debajo del recuadro negro, se inserta el siguiente texto centrado
+        tk.Label(self.formulario_window, 
+                text="FORMATO DEL REGISTRO DE DEFECTOS", 
+                font=("Arial", 12, "bold"),
+                anchor="center").pack(fill="x", pady=(10,0))
 
         # Debajo del recuadro, se crea un frame extra para mostrar la información del proyecto
         extra_info_frame = tk.Frame(self.formulario_window)
