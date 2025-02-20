@@ -328,6 +328,14 @@ class TimeTracker:
         tk.Label(prog_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
 
+        # Espacio adicional para encabezados de columnas de defectos
+        headers_frame = tk.Frame(self.formulario_window)
+        headers_frame.pack(fill="x", pady=(10,0))
+        headers = ["Fecha", "Número", "Tipo", "Encontrado", "Removido", "Tiempo de compostura", "Defecto Arreglado"]
+        for header in headers:
+            tk.Label(headers_frame, text=header, font=("Arial", 10, "bold"), anchor="center").pack(side="left", expand=True, fill="x")
+
+
 
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
