@@ -278,8 +278,17 @@ class TimeTracker:
         for item in defects_col2:
             tk.Label(col2, text=item, font=("Arial", 10), anchor="w").pack(pady=1, fill="x")
 
+        # Debajo del recuadro, se crea un frame extra para mostrar la información del proyecto
         extra_info_frame = tk.Frame(self.formulario_window)
         extra_info_frame.pack(anchor="w", padx=20, pady=(10,0))
+
+        # Se crean dos columnas: izquierda y derecha
+        left_frame = tk.Frame(extra_info_frame)
+        left_frame.pack(side="left", anchor="w")
+
+        right_frame = tk.Frame(extra_info_frame)
+        right_frame.pack(side="left", anchor="w", padx=(50,0))  # Se agrega un poco de espacio horizontal entre ambas
+
         data = self.load_data()
         if self.project in data:
             alumno_val = data[self.project].get("Alumno", "")
@@ -287,28 +296,30 @@ class TimeTracker:
         else:
             alumno_val = ""
             profesor_val = ""
-        # Para 'ESTUDIANTE:' y su valor con underline en el mismo renglón
-        est_frame = tk.Frame(extra_info_frame)
+            
+        # Columna izquierda: Estudiante e Instructor
+        est_frame = tk.Frame(left_frame)
         est_frame.pack(anchor="w", fill="x")
         tk.Label(est_frame, text="ESTUDIANTE: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(est_frame, text=alumno_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
-        # Para 'INSTRUCTOR:' y su valor con underline en el mismo renglón
-        inst_frame = tk.Frame(extra_info_frame)
+        inst_frame = tk.Frame(left_frame)
         inst_frame.pack(anchor="w", fill="x")
         tk.Label(inst_frame, text="INSTRUCTOR: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(inst_frame, text=profesor_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
-        # Fila 2: FECHA y PROGRAMA #
-        info2_frame = tk.Frame(extra_info_frame)
-        info2_frame.pack(anchor="w", fill="x", pady=(5,0))
-        # Se utiliza la fecha actual; en caso de que tengas otra fuente, cámbiala aquí.
+        # Columna derecha: Fecha y Programa #
         fecha_val = datetime.datetime.now().strftime("%d/%m/%Y")
         program_val = ""  # Aquí asigna el valor de "PROGRAMA #" si lo tienes.
-        tk.Label(info2_frame, text="FECHA: ", font=("Arial", 10), anchor="w").pack(side="left")
-        tk.Label(info2_frame, text=fecha_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
-        tk.Label(info2_frame, text="   PROGRAMA # ", font=("Arial", 10), anchor="w").pack(side="left")
-        tk.Label(info2_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
+        fecha_frame = tk.Frame(right_frame)
+        fecha_frame.pack(anchor="w", fill="x")
+        tk.Label(fecha_frame, text="FECHA: ", font=("Arial", 10), anchor="w").pack(side="left")
+        tk.Label(fecha_frame, text=fecha_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
+
+        prog_frame = tk.Frame(right_frame)
+        prog_frame.pack(anchor="w", fill="x")
+        tk.Label(prog_frame, text="PROGRAMA #: ", font=("Arial", 10), anchor="w").pack(side="left")
+        tk.Label(prog_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
 
 
