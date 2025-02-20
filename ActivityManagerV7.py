@@ -368,6 +368,14 @@ class TimeTracker:
                                         value="SI", font=("Arial", 10, "bold"), fg="green")
         defecto_verde_rb.pack(side="left", padx=5)
 
+        # Se agrega el texto "DESCRIPCIÓN" debajo de los campos anteriores
+        tk.Label(self.formulario_window, text="DESCRIPCIÓN", font=("Arial", 10, "bold"), anchor="w")\
+        .pack(fill="x", pady=(20,0))
+
+        # Cuadro para que el usuario ingrese el texto para la descripción
+        descripcion_text = tk.Text(self.formulario_window, height=5, font=("Arial", 10))
+        descripcion_text.pack(fill="both", padx=20, pady=(10,10))
+
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
 
