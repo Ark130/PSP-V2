@@ -439,6 +439,47 @@ class TimeTracker:
         # Cuadro para que el usuario ingrese el texto para la descripción
         descripcion_text = tk.Text(self.formulario_window, height=5, font=("Arial", 10))
         descripcion_text.pack(fill="both", padx=20, pady=(10,10))
+        
+        # Función para guardar los datos del formulario en Defectos.json, incluyendo el identificador (nombre del proyecto)
+        def save_defecto_form():
+            # Obtener la fecha actual (formateada similar a la columna 0)
+            fecha = datetime.datetime.now().strftime("%d/%m/%Y")
+            # Número: aquí se asigna "1", pero si se requiere autoincrementable se puede calcular
+            numero = "1"
+            tipo = tipo_cb.get()
+            encontrado = encontrado_cb.get()
+            # 'Removido' se toma de self.activity (este Label ya lo muestra)
+            removido = self.activity
+            tiempo_compostura = self.tiempo_label.cget("text")
+            defecto_arreglado = defecto_var.get()
+            descripcion = descripcion_text.get("1.0", tk.END).strip()
+            identificador = self.project   # Nombre del proyecto seleccionado
+
+            nuevo_defecto = {
+                "Fecha": fecha,
+                "Numero": numero,
+                "Tipo": tipo,
+                "Encontrado": encontrado,
+                "Removido": removido,
+                "Tiempo de compostura": tiempo_compostura,
+                "Defecto Arreglado": defecto_arreglado,
+                "Descripción": descripcion,
+                "identificador": identificador
+            }
+            # Cargar los defectos existentes desde Defectos.json
+            defectos = self.load_defectos()
+            # Generar una nueva clave única (por ejemplo, usando el timestamp)
+            nueva_clave = f"{identificador}_{int(time.time())}"
+            defectos[nueva_clave] = nuevo_defecto
+            with open(DEFECTOS_FILE, "w", encoding="utf-8") as file:
+                json.dump(defectos, file, ensure_ascii=False, indent=4)
+            messagebox.showinfo("Guardado", "Defecto guardado en Defectos.json")
+            self.formulario_window.destroy()
+            self.formulario_window = None
+
+        # Botón para guardar el registro de defecto
+        tk.Button(self.formulario_window, text="Guardar Defecto", font=("Arial", 10, "bold"),
+                command=save_defecto_form).pack(pady=(10,20))
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
