@@ -365,15 +365,15 @@ class TimeTracker:
 
         def toggle_rojo():
             if defecto_rojo_var.get():
-                defecto_rojo_cb.config(bg="red", fg="white")
+                defecto_rojo_cb.config(bg="red", activebackground="red", selectcolor="red", fg="white")
             else:
-                defecto_rojo_cb.config(bg="SystemButtonFace", fg="black")
+                defecto_rojo_cb.config(bg="SystemButtonFace", activebackground="SystemButtonFace", selectcolor="SystemButtonFace", fg="black")
 
         def toggle_verde():
             if defecto_verde_var.get():
-                defecto_verde_cb.config(bg="green", fg="white")
+                defecto_verde_cb.config(bg="green", activebackground="green", selectcolor="green", fg="white")
             else:
-                defecto_verde_cb.config(bg="SystemButtonFace", fg="black")
+                defecto_verde_cb.config(bg="SystemButtonFace", activebackground="SystemButtonFace", selectcolor="SystemButtonFace", fg="black")
 
         defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="No", variable=defecto_rojo_var,
                                         font=("Arial", 10), indicatoron=0, width=5, command=toggle_rojo)
