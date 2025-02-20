@@ -359,15 +359,14 @@ class TimeTracker:
         # Defecto Arreglado: dos checkbuttons en un frame interno
         defecto_frame = tk.Frame(details_frame)
         defecto_frame.pack(side="left", expand=True, fill="x")
-        # Variables booleanas para los checkbuttons
-        defecto_rojo_var = tk.BooleanVar()
-        defecto_verde_var = tk.BooleanVar()
-        defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="Rojo", variable=defecto_rojo_var,
-                                        font=("Arial", 10), fg="red", selectcolor="red")
-        defecto_rojo_cb.pack(side="left", padx=5)
-        defecto_verde_cb = tk.Checkbutton(defecto_frame, text="Verde", variable=defecto_verde_var,
-                                        font=("Arial", 10), fg="green", selectcolor="green")
-        defecto_verde_cb.pack(side="left", padx=5)
+        # Defecto Arreglado: dos radiobuttons en un frame interno
+        defecto_var = tk.StringVar()  # Variable compartida para que sean mutuamente excluyentes
+        defecto_rojo_rb = tk.Radiobutton(defecto_frame, text="NO", variable=defecto_var,
+                                        value="Rojo", font=("Arial", 10, "bold"), fg="red")
+        defecto_rojo_rb.pack(side="left", padx=5)
+        defecto_verde_rb = tk.Radiobutton(defecto_frame, text="SI", variable=defecto_var,
+                                        value="SI", font=("Arial", 10, "bold"), fg="green")
+        defecto_verde_rb.pack(side="left", padx=5)
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
