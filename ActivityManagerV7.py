@@ -299,6 +299,18 @@ class TimeTracker:
         tk.Label(inst_frame, text="INSTRUCTOR: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(inst_frame, text=profesor_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
+        # Fila 2: FECHA y PROGRAMA #
+        info2_frame = tk.Frame(extra_info_frame)
+        info2_frame.pack(anchor="w", fill="x", pady=(5,0))
+        # Se utiliza la fecha actual; en caso de que tengas otra fuente, cámbiala aquí.
+        fecha_val = datetime.datetime.now().strftime("%d/%m/%Y")
+        program_val = ""  # Aquí asigna el valor de "PROGRAMA #" si lo tienes.
+        tk.Label(info2_frame, text="FECHA: ", font=("Arial", 10), anchor="w").pack(side="left")
+        tk.Label(info2_frame, text=fecha_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
+        tk.Label(info2_frame, text="   PROGRAMA # ", font=("Arial", 10), anchor="w").pack(side="left")
+        tk.Label(info2_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
+
+
 
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
