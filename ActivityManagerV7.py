@@ -398,12 +398,23 @@ class TimeTracker:
         encontrado_cb.grid(row=0, column=3, sticky="nsew", padx=1)
 
         # Columna 4: Removido (Campo de entrada)
-        removido_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
-        removido_entry.grid(row=0, column=4, sticky="nsew", padx=1)
+        removido_label = tk.Label(details_frame, text=self.activity, font=("Arial", 10), anchor="center")
+        removido_label.grid(row=0, column=4, sticky="nsew", padx=1)
 
-        # Columna 5: Tiempo de compostura (Campo de entrada)
-        tiempo_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
-        tiempo_entry.grid(row=0, column=5, sticky="nsew", padx=1)
+
+        # Columna 5: Tiempo de compostura (Label que mostrará el tiempo del cronómetro en minutos)
+        self.tiempo_label = tk.Label(details_frame, text="0", font=("Arial", 10), anchor="center")
+        self.tiempo_label.grid(row=0, column=5, sticky="nsew", padx=1)
+
+        # Función para actualizar el Label en tiempo real
+        def update_tiempo_label():
+            elapsed = time.time() - self.defecto_timer_start  # Tiempo transcurrido desde el inicio del cronómetro
+            minutes = int(elapsed / 60)  # Convertir a minutos
+            self.tiempo_label.config(text=str(minutes))
+            self.formulario_window.after(1000, update_tiempo_label)
+
+        # Iniciar la actualización
+        update_tiempo_label()
 
         # Columna 6: Defecto Arreglado (Frame interno para contener los radiobuttons)
         defecto_frame = tk.Frame(details_frame)
