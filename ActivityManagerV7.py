@@ -362,6 +362,12 @@ class TimeTracker:
         # Las variables booleanas se guardan como atributos para conservar su estado
         self.defecto_rojo_var = tk.BooleanVar()
         self.defecto_verde_var = tk.BooleanVar()
+        defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="No", variable=self.defecto_rojo_var,
+                                        font=("Arial", 10), fg="red", selectcolor="red")
+        defecto_rojo_cb.pack(side="left", padx=5)
+        defecto_verde_cb = tk.Checkbutton(defecto_frame, text="Si", variable=self.defecto_verde_var,
+                                        font=("Arial", 10), fg="green", selectcolor="green")
+        defecto_verde_cb.pack(side="left", padx=5)
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
