@@ -341,13 +341,13 @@ class TimeTracker:
         .pack(side="left", expand=True, fill="x")
         # Tipo: combobox con opciones numéricas
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
-        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10))
+        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10), width=1)
         tipo_cb.current(0)
         tipo_cb.pack(side="left", expand=True, fill="x")
         # Encontrado: combobox con opciones de actividad
         encontrado_values = ["Planificación", "Análisis", "Codificación", "Pruebas",
                             "Lanzamiento", "Revisión", "Revisión de código", "Diagramar", "Reunión"]
-        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10))
+        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10), width=2)
         encontrado_cb.current(0)
         encontrado_cb.pack(side="left", expand=True, fill="x")
         # Removido: campo de entrada
