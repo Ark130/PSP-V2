@@ -240,13 +240,10 @@ class TimeTracker:
         # Ensanchar la ventana (por ejemplo, 1000px de ancho y 600px de alto)
         self.formulario_window.geometry("1000x600")
 
-        # Crear un contenedor para ambos recuadros
-        recuadros_frame = tk.Frame(self.formulario_window)
-        recuadros_frame.pack(anchor="nw", padx=20, pady=(0,20))
 
-        # Recuadro izquierdo: TIPOS DE DEFECTOS (código existente)
-        border_frame = tk.Frame(recuadros_frame, bd=2, relief="solid")
-        border_frame.pack(side="left", padx=(0,10))
+        # Frame contenedor con borde negro, pegado al borde superior e izquierdo
+        border_frame = tk.Frame(self.formulario_window, bd=2, relief="solid")
+        border_frame.pack(anchor="nw", padx=20, pady=(0,20))
 
         # Título centrado
         title_label = tk.Label(border_frame, text="TIPOS DE DEFECTOS", font=("Arial", 12, "bold"))
@@ -282,11 +279,17 @@ class TimeTracker:
         for item in defects_col2:
             tk.Label(col2, text=item, font=("Arial", 10), anchor="w").pack(pady=1, fill="x")
 
-        # Recuadro derecho: se crea uno de las mismas dimensiones (para ahora mostrar texto de marcador)
-        other_frame = tk.Frame(recuadros_frame, bd=2, relief="solid", width=border_frame.winfo_reqwidth(), height=border_frame.winfo_reqheight())
-        other_frame.pack(side="left", padx=(10,0))
-        other_frame.pack_propagate(False)  # Evita que se redimensione automáticamente
-        tk.Label(other_frame, text="OTRO RECUADRO", font=("Arial", 12, "bold")).pack(pady=10)
+
+        # --- NUEVA SECCIÓN: Contador de Tiempo ---
+        counter_frame = tk.Frame(self.formulario_window)
+        # Se posiciona al borde superior derecho (relx=1.0, y=0, con anclaje al noreste)
+        counter_frame.place(relx=1.0, x=-150 ,y=80, anchor="ne")
+        self.defecto_timer_label = tk.Label(counter_frame, text="00:00:00", font=("Arial", 24))
+        self.defecto_timer_label.pack(pady=10)
+        # Guardar el tiempo de inicio y activar la actualización del contador
+        self.defecto_timer_start = time.time()
+        self.update_defecto_timer()
+
 
 
         # Debajo del recuadro negro, se inserta el siguiente texto centrado
@@ -352,20 +355,20 @@ class TimeTracker:
         .pack(side="left", expand=True, fill="x")
         # Tipo: combobox con opciones numéricas
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
-        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10))
+        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10), width=2)
         tipo_cb.current(0)
-        tipo_cb.pack(side="left", expand=True, fill="x")
+        tipo_cb.pack(side="left", padx=5, pady=2)
         # Encontrado: combobox con opciones de actividad
         encontrado_values = ["Planificación", "Análisis", "Codificación", "Pruebas",
                             "Lanzamiento", "Revisión", "Revisión de código", "Diagramar", "Reunión"]
-        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10))
+        encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10), width=2)
         encontrado_cb.current(0)
         encontrado_cb.pack(side="left", expand=True, fill="x")
         # Removido: campo de entrada
-        removido_entry = tk.Entry(details_frame, font=("Arial", 10))
+        removido_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
         removido_entry.pack(side="left", expand=True, fill="x")
         # Tiempo de compostura: campo de entrada
-        tiempo_entry = tk.Entry(details_frame, font=("Arial", 10))
+        tiempo_entry = tk.Entry(details_frame, font=("Arial", 10), width=1)
         tiempo_entry.pack(side="left", expand=True, fill="x")
         # Defecto Arreglado: dos checkbuttons en un frame interno
         defecto_frame = tk.Frame(details_frame)
@@ -475,6 +478,15 @@ class TimeTracker:
         if not os.path.exists(DATA_FILE):
             with open(DATA_FILE, "w", encoding="utf-8") as file:
                 json.dump({}, file, ensure_ascii=False)
+    
+    def update_defecto_timer(self):
+        elapsed = int(time.time() - self.defecto_timer_start)
+        hrs, rem = divmod(elapsed, 3600)
+        mins, secs = divmod(rem, 60)
+        self.defecto_timer_label.config(text=f"{hrs:02d}:{mins:02d}:{secs:02d}")
+        # Actualiza cada 1000 ms (1 segundo)
+        self.formulario_window.after(1000, self.update_defecto_timer)
+    
     
     def update_clock(self):
         try:
