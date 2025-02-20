@@ -341,10 +341,10 @@ class TimeTracker:
         .pack(side="left", expand=True, fill="x")
         # Tipo: combobox con opciones numéricas
         tipo_values = ["10", "20", "30", "40", "50", "60", "70", "80", "90", "100"]
-        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10))
+        tipo_cb = ttk.Combobox(details_frame, values=tipo_values, state="readonly", font=("Arial", 10), width=5)
         tipo_cb.current(0)
         tipo_cb.pack(side="left", expand=True, fill="x")
-        # Encontrado: combobox con opciones de actividad
+        # Encontrado: combobox con las opciones de actividad
         encontrado_values = ["Planificación", "Análisis", "Codificación", "Pruebas",
                             "Lanzamiento", "Revisión", "Revisión de código", "Diagramar", "Reunión"]
         encontrado_cb = ttk.Combobox(details_frame, values=encontrado_values, state="readonly", font=("Arial", 10))
@@ -359,15 +359,9 @@ class TimeTracker:
         # Defecto Arreglado: dos checkbuttons en un frame interno
         defecto_frame = tk.Frame(details_frame)
         defecto_frame.pack(side="left", expand=True, fill="x")
-        # Variables booleanas para los checkbuttons
-        defecto_rojo_var = tk.BooleanVar()
-        defecto_verde_var = tk.BooleanVar()
-        defecto_rojo_cb = tk.Checkbutton(defecto_frame, text="No", variable=defecto_rojo_var,
-                                        font=("Arial", 10), fg="red", selectcolor="red")
-        defecto_rojo_cb.pack(side="left", padx=5)
-        defecto_verde_cb = tk.Checkbutton(defecto_frame, text="Si", variable=defecto_verde_var,
-                                        font=("Arial", 10), fg="green", selectcolor="green")
-        defecto_verde_cb.pack(side="left", padx=5)
+        # Las variables booleanas se guardan como atributos para conservar su estado
+        self.defecto_rojo_var = tk.BooleanVar()
+        self.defecto_verde_var = tk.BooleanVar()
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
