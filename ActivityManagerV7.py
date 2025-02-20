@@ -579,15 +579,11 @@ class TimeTracker:
             self.label_current_project.config(text=self.project)  # Actualizar el nombre del proyecto en la GUI
             self.button_start.config(state=tk.NORMAL)
 
-            # Activar el botón "Formulario" (y otros, si lo deseas)
-            self.button_formulario.config(state=tk.NORMAL)
-
             # Cargar los datos de "Alumno" y "Profesor" para el proyecto seleccionado
             data = self.load_data()
             if self.project in data:
                 alumno = data[self.project].get("Alumno", "")
                 profesor = data[self.project].get("Profesor", "")
-                # Habilitamos brevemente las cajas para actualizar su contenido
                 self.alumno_entry.config(state=tk.NORMAL)
                 self.alumno_entry.delete(0, tk.END)
                 self.alumno_entry.insert(0, alumno)
@@ -623,12 +619,12 @@ class TimeTracker:
         def accept_activity():
             self.activity = activity_var.get()
             activity_window.destroy()
-            # Si la opción está habilitada, preguntamos al usuario;
-            # de lo contrario, se fija la opción por defecto ("final")
             if self.allow_comment_choice:
                 if messagebox.askyesno("Comentarios", "¿Desea añadir comentarios al inicio?"):
                     self.comment_timing = "inicio"
                     self.open_comment_dialog()
+                    # Activa el botón "Formulario" al seleccionar la actividad
+                    self.button_formulario.config(state=tk.NORMAL)
                     return
                 else:
                     self.comment_timing = "final"
@@ -644,6 +640,8 @@ class TimeTracker:
             self.button_start.config(state=tk.DISABLED)
             self.button_pause.config(state=tk.NORMAL)
             self.button_stop.config(state=tk.NORMAL)
+            # Activar el botón "Formulario" solo después de seleccionar una actividad
+            self.button_formulario.config(state=tk.NORMAL)
         tk.Button(activity_window, text="Aceptar", command=accept_activity).pack(pady=5)
     
     def open_comment_dialog(self):
