@@ -129,7 +129,7 @@ class TimeTracker:
         info_frame.pack(fill="x", padx=10, pady=(20,5))
 
         label_alumno = tk.Label(info_frame, text="ALUMNO", font=("Arial", 11, "bold"))
-        label_alumno.grid(row=0, column=0, sticky="w", padx=(150, 0))  # 20 píxeles a la izquierda
+        label_alumno.grid(row=0, column=0, sticky="w", padx=(145, 0))  # 20 píxeles a la izquierda
 
         label_profesor = tk.Label(info_frame, text="PROFESOR", font=("Arial", 11, "bold"))
         label_profesor.grid(row=0, column=1, sticky="e", padx=(0, 130))  # 20 píxeles a la derecha
@@ -171,6 +171,10 @@ class TimeTracker:
         self.button_pause.pack(fill='x', pady=5)
         self.button_stop = tk.Button(button_col2, text="Detener", command=self.stop_timer, state=tk.DISABLED)
         self.button_stop.pack(fill='x', pady=5)
+        
+        # Nuevo botón "PDF Form" debajo de "Detener"
+        self.button_pdf_form = tk.Button(button_col2, text="PDF Form", command=lambda: None)
+        self.button_pdf_form.pack(fill='x', pady=5)
 
         # Columna 3: Gráficas y borrado
         button_col3 = tk.Frame(button_frame)
