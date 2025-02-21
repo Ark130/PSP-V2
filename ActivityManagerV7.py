@@ -327,14 +327,14 @@ class TimeTracker:
         right_frame = tk.Frame(extra_info_frame)
         right_frame.pack(side="left", anchor="w", padx=(50,0))
         fecha_val = datetime.datetime.now().strftime("%d/%m/%Y")
-        program_val = ""  # Aquí asigna el valor de "PROGRAMA #", si se tiene.
+        program_val = self.project  # Aquí asigna el valor de "PROGRAMA #", si se tiene.
         fecha_frame = tk.Frame(right_frame)
         fecha_frame.pack(anchor="w", fill="x")
         tk.Label(fecha_frame, text="FECHA: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(fecha_frame, text=fecha_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
         prog_frame = tk.Frame(right_frame)
         prog_frame.pack(anchor="w", fill="x")
-        tk.Label(prog_frame, text="PROGRAMA #: ", font=("Arial", 10), anchor="w").pack(side="left")
+        tk.Label(prog_frame, text="PROGRAMA: ", font=("Arial", 10), anchor="w").pack(side="left")
         tk.Label(prog_frame, text=program_val, font=("Arial", 10, "underline"), anchor="w").pack(side="left")
 
         # Modificar el header para usar grid, asignando un mismo peso Y uniformidad a cada columna
@@ -448,7 +448,24 @@ class TimeTracker:
         descripcion_text = tk.Text(self.formulario_window, height=5, font=("Arial", 10))
         descripcion_text.pack(fill="both", padx=20, pady=(10,10))
         
-        # Función para guardar los datos del formulario en Defectos.json, incluyendo el identificador (nombre del proyecto)
+        # --- Función para controlar el estado del botón "Guardar Defecto" ---
+        def update_guardar_button():
+            tipo_val = tipo_cb.get().strip()
+            encontrado_val = encontrado_cb.get().strip()
+            descripcion_val = descripcion_text.get("1.0", tk.END).strip()
+            
+            if tipo_val and encontrado_val and descripcion_val:
+                guardar_defecto_btn.config(state=tk.NORMAL)
+            else:
+                guardar_defecto_btn.config(state=tk.DISABLED)
+
+        # Vincular eventos para actualizar el botón al cambiar el contenido
+        tipo_cb.bind("<<ComboboxSelected>>", lambda event: update_guardar_button())
+        encontrado_cb.bind("<<ComboboxSelected>>", lambda event: update_guardar_button())
+        descripcion_text.bind("<KeyRelease>", lambda event: update_guardar_button())
+
+        
+        # --- Función para guardar los datos del formulario ---
         def save_defecto_form():
             # Obtener la fecha actual
             fecha = datetime.datetime.now().strftime("%d/%m/%Y")
@@ -457,25 +474,20 @@ class TimeTracker:
             # Se toma la actividad actual mostrada en el Label "Removido"
             removido = self.activity
             tiempo_compostura = self.tiempo_label.cget("text")
-            # Interpretar el combobox: si se seleccionó "SI", se toma "SI"; de lo contrario, "NO"
+            # Interpretar el combobox de defecto arreglado
             if defecto_cb.get() == "SI":
                 defecto_arreglado = "SI"
             else:
                 defecto_arreglado = "NO"
             descripcion = descripcion_text.get("1.0", tk.END).strip()
-            # El nombre del proyecto se almacena en "proyecto"
             proyecto = self.project
-            # Recuperar el alumno y el profesor de la GUI principal
             alumno_val = self.alumno_entry.get()
             profesor_val = self.profesor_entry.get()
 
-            # Cargar los defectos existentes desde Defectos.json
             defectos = self.load_defectos()
-            # Si aún no existe el proyecto en defectos, lo inicializamos
             if proyecto not in defectos:
                 defectos[proyecto] = {}
 
-            # Calcular el número (autoincrementable) para este proyecto
             contador = sum(1 for d in defectos[proyecto].values() if isinstance(d, dict))
             numero = str(contador + 1)
 
@@ -491,7 +503,6 @@ class TimeTracker:
                 "Alumno": alumno_val,
                 "Profesor": profesor_val
             }
-            # Generar una nueva clave única (usando el timestamp)
             nueva_clave = str(int(time.time()))
             defectos[proyecto][nueva_clave] = nuevo_defecto
 
@@ -501,9 +512,10 @@ class TimeTracker:
             self.formulario_window.destroy()
             self.formulario_window = None
 
-        # Botón para guardar el registro de defecto
-        tk.Button(self.formulario_window, text="Guardar Defecto", font=("Arial", 10, "bold"),
-                command=save_defecto_form).pack(pady=(10,20))
+        # Botón para guardar el registro de defecto, inicialmente deshabilitado
+        guardar_defecto_btn = tk.Button(self.formulario_window, text="Guardar Defecto", font=("Arial", 10, "bold"),
+                                        command=save_defecto_form, state=tk.DISABLED)
+        guardar_defecto_btn.pack(pady=(10,20))
 
         # Asegurarse de que al cerrar la ventana se borre la referencia
         self.formulario_window.protocol("WM_DELETE_WINDOW", self.close_formulario)
