@@ -389,7 +389,7 @@ class TimeTracker:
                             font=("Arial", 10), 
                             width=2,
                             justify="center")
-        tipo_cb.current(0)
+        tipo_cb.set("")
         tipo_cb.grid(row=0, column=2, sticky="nsew", padx=5, pady=2)
 
         # Columna 3: Encontrado (Combobox de opciones de actividad)
@@ -401,7 +401,7 @@ class TimeTracker:
                                     font=("Arial", 10),
                                     justify="center", 
                                     width=2)
-        encontrado_cb.current(0)
+        encontrado_cb.set("")
         encontrado_cb.grid(row=0, column=3, sticky="nsew", padx=1)
 
         # Columna 4: Removido (Campo de entrada)
@@ -423,21 +423,22 @@ class TimeTracker:
         # Iniciar la actualización
         update_tiempo_label()
 
-        # Columna 6: Defecto Arreglado (Frame interno para contener los radiobuttons)
+        # Columna 6: Defecto Arreglado (Usando Combobox en vez de Checkbutton o Radiobuttons)
         defecto_frame = tk.Frame(details_frame)
         defecto_frame.grid(row=0, column=6, sticky="nsew", padx=1)
-        # Para que también se expanda el frame interno, podemos configurar su grid uniformemente
-        for col in range(2):
-            defecto_frame.columnconfigure(col, weight=1, uniform="col")
-            
-        # En lugar de pack, usamos grid para que queden alineados con el resto
-        defecto_var = tk.StringVar()  # Variable para exclusión mutua
-        defecto_rojo_rb = tk.Radiobutton(defecto_frame, text="NO", variable=defecto_var,
-                                        value="Rojo", font=("Arial", 10, "bold"), fg="red")
-        defecto_rojo_rb.grid(row=0, column=0, sticky="nsew", padx=5)
-        defecto_verde_rb = tk.Radiobutton(defecto_frame, text="SI", variable=defecto_var,
-                                        value="SI", font=("Arial", 10, "bold"), fg="green")
-        defecto_verde_rb.grid(row=0, column=1, sticky="nsew", padx=5)
+        defecto_frame.columnconfigure(0, weight=1)
+
+        # Crear un combobox con las opciones "NO" y "SI"
+        defecto_values = ["NO", "SI"]
+        defecto_cb = ttk.Combobox(defecto_frame, 
+                                values=defecto_values, 
+                                state="readonly", 
+                                font=("Arial", 10, "bold"),
+                                width=5, 
+                                justify="center")
+        # Iniciar sin selección
+        defecto_cb.set("")
+        defecto_cb.grid(row=0, column=0, sticky="nsew", padx=5)
 
         # Se agrega el texto "DESCRIPCIÓN" debajo de los campos anteriores
         tk.Label(self.formulario_window, text="DESCRIPCIÓN", font=("Arial", 10, "bold"), anchor="w")\
@@ -456,7 +457,11 @@ class TimeTracker:
             # Se toma la actividad actual mostrada en el Label "Removido"
             removido = self.activity
             tiempo_compostura = self.tiempo_label.cget("text")
-            defecto_arreglado = defecto_var.get()
+            # Interpretar el combobox: si se seleccionó "SI", se toma "SI"; de lo contrario, "NO"
+            if defecto_cb.get() == "SI":
+                defecto_arreglado = "SI"
+            else:
+                defecto_arreglado = "NO"
             descripcion = descripcion_text.get("1.0", tk.END).strip()
             # El nombre del proyecto se almacena en "proyecto"
             proyecto = self.project
@@ -486,7 +491,7 @@ class TimeTracker:
                 "Alumno": alumno_val,
                 "Profesor": profesor_val
             }
-            # Generar una nueva clave única (por ejemplo, usando el timestamp)
+            # Generar una nueva clave única (usando el timestamp)
             nueva_clave = str(int(time.time()))
             defectos[proyecto][nueva_clave] = nuevo_defecto
 
