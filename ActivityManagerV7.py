@@ -172,9 +172,10 @@ class TimeTracker:
         self.button_stop = tk.Button(button_col2, text="Detener", command=self.stop_timer, state=tk.DISABLED)
         self.button_stop.pack(fill='x', pady=5)
         
-        # Nuevo botón "PDF Form" debajo de "Detener"
-        self.button_pdf_form = tk.Button(button_col2, text="PDF Form", command=lambda: None)
+        # Nuevo botón "PDF Form" debajo de "Detener", inicialmente deshabilitado
+        self.button_pdf_form = tk.Button(button_col2, text="PDF Form", command=lambda: None, state=tk.DISABLED)
         self.button_pdf_form.pack(fill='x', pady=5)
+        self.button_pdf_form.config(command=self.create_pdf_form)
 
         # Columna 3: Gráficas y borrado
         button_col3 = tk.Frame(button_frame)
@@ -645,6 +646,7 @@ class TimeTracker:
                 messagebox.showinfo("Proyecto Creado", f"Proyecto '{project_name}' creado con éxito.")
             self.project = project_name
             self.button_start.config(state=tk.NORMAL)
+            self.button_pdf_form.config(state=tk.NORMAL)  # Habilitar PDF Form
     
     def select_project(self):
         data = self.load_data()
@@ -670,6 +672,7 @@ class TimeTracker:
             self.project = project_var.get()
             self.label_current_project.config(text=self.project)  # Actualizar el nombre del proyecto en la GUI
             self.button_start.config(state=tk.NORMAL)
+            self.button_pdf_form.config(state=tk.NORMAL)  # Habilitar PDF Form
 
             # Cargar los datos de "Alumno" y "Profesor" para el proyecto seleccionado
             data = self.load_data()
@@ -1024,6 +1027,8 @@ class TimeTracker:
         total_inactive_time = 0
 
         for key, detalles in project_data.items():
+            if not isinstance(detalles, dict):
+                continue
             act = detalles.get("actividad", "Desconocido")
             activo = detalles.get("activo", 0) + detalles.get("extra", 0)
             inactivo = detalles.get("inactivo", 0)
@@ -1138,12 +1143,14 @@ class TimeTracker:
             try:
                 creation_dt = datetime.datetime.fromisoformat(creation_ts)
                 dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-                meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+                meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+                        "septiembre", "octubre", "noviembre", "diciembre"]
                 fecha = f"{dias[creation_dt.weekday()]}, {creation_dt.day:02d} {meses[creation_dt.month - 1]} {creation_dt.year}"
                 inicio = creation_dt.strftime("%H:%M:%S")
             except Exception:
                 fecha = creation_ts
                 inicio = ""
+            
             stop_ts = detalles.get("timestamp_detener", "")
             try:
                 stop_dt = datetime.datetime.fromisoformat(stop_ts)
@@ -1154,6 +1161,7 @@ class TimeTracker:
             interrupcion = detalles.get("inactivo", 0)
             a_tiempo = detalles.get("activo", 0) + detalles.get("extra", 0)
             actividad = detalles.get("actividad", "")
+            
             tree.insert("", "end", iid=key, values=(fecha, inicio, fin, interrupcion, a_tiempo, actividad, "Ver"))
         
         tree.bind("<ButtonRelease-1>", lambda event: self.on_tree_item_click(event, tree, project_data))
@@ -1276,6 +1284,125 @@ class TimeTracker:
             self.clear_window = None
 
 
+
+
+    def create_pdf_form(self):
+        from reportlab.lib.pagesizes import landscape, A4
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.units import cm
+
+        # Función auxiliar exclusiva para este pdf
+        def wrap_text_form(text, max_width, c, fontName, fontSize):
+            words = text.split()
+            lines = []
+            current_line = ""
+            for word in words:
+                test_line = current_line + (" " if current_line else "") + word
+                if c.stringWidth(test_line, fontName, fontSize) <= max_width:
+                    current_line = test_line
+                else:
+                    if current_line:
+                        lines.append(current_line)
+                    current_line = word
+            if current_line:
+                lines.append(current_line)
+            return lines
+
+        # Recuperar datos de alumno, instructor y proyecto
+        data = self.load_data()
+        alumno_val = data.get(self.project, {}).get("Alumno", "")
+        profesor_val = data.get(self.project, {}).get("Profesor", "")
+        proyecto_val = self.project
+        fecha_val = datetime.datetime.now().strftime("%d/%m/%Y")
+        
+        # Crear PDF en orientación horizontal
+        pdf_filename = f"{proyecto_val}_form.pdf"
+        c = canvas.Canvas(pdf_filename, pagesize=landscape(A4))
+        
+        # Encabezado del PDF:
+        c.setFont("Helvetica-Bold", 12)
+        header_line = f"ESTUDIANTE: {alumno_val}      INSTRUCTOR: {profesor_val}      FECHA: {fecha_val}"
+        c.drawCentredString(landscape(A4)[0] / 2, 19*cm, header_line)
+        
+        c.setFont("Helvetica-Bold", 14)
+        c.drawCentredString(landscape(A4)[0] / 2, 18*cm, f"Proyecto: {proyecto_val}")
+        
+        # Definir columnas y anchos (la columna "Descripción" es la más ancha)
+        columnas = ["Fecha", "Número", "Tipo", "Encontrado", "Removido", "T. Compostura", "Descripción"]
+        col_widths = [3*cm, 2*cm, 2*cm, 3*cm, 3*cm, 4*cm, 8*cm]
+        x_positions = []
+        x = 2 * cm
+        for width in col_widths:
+            x_positions.append(x)
+            x += width
+
+        # Dibujar la cabecera de la tabla
+        y_pos = 16 * cm
+        row_height = 1 * cm
+        for i, col in enumerate(columnas):
+            center_x = x_positions[i] + col_widths[i] / 2
+            c.setFillColorRGB(0, 0, 0)
+            c.rect(x_positions[i], y_pos, col_widths[i], row_height, fill=1, stroke=0)
+            c.setFillColorRGB(1, 1, 1)
+            c.setFont("Helvetica-Bold", 12)
+            c.drawCentredString(center_x, y_pos + row_height/2 - 4, col)
+        
+        # Recuperar datos de defectos desde Defectos.json
+        defectos = self.load_defectos().get(self.project, {})
+        
+        # Dibujar las filas de la tabla
+        current_y = y_pos - row_height
+        for j, (key, registro) in enumerate(defectos.items()):
+            fila = [
+                registro.get("Fecha", ""),
+                registro.get("Número", ""),
+                registro.get("Tipo", ""),
+                registro.get("Encontrado", ""),
+                registro.get("Removido", ""),
+                registro.get("Tiempo de compostura", ""),
+                registro.get("Descripción", "")
+            ]
+            for i, cell in enumerate(fila):
+                center_x = x_positions[i] + col_widths[i] / 2
+                c.setFillColorRGB(0, 0, 0)
+                # Para todas las celdas usamos Helvetica 8, pero en "Descripción" ajustamos el texto
+                if i == 6:
+                    # Ajustar el texto para que no rebase el ancho de la columna (se usa un pequeño margen)
+                    lines = wrap_text_form(str(cell), col_widths[i] - 4, c, "Helvetica", 8)
+                    # Se calcula el espacio total para el texto
+                    line_height = 10  # Altura de cada línea en puntos
+                    num_lines = max(len(lines), 1)
+                    total_text_height = num_lines * line_height
+                    # Posición vertical centralizada en la celda
+                    text_y = current_y - row_height/2 + (total_text_height/2)
+                    for line in lines:
+                        c.setFont("Helvetica", 8)
+                        c.drawCentredString(center_x, text_y, line)
+                        text_y -= line_height
+                else:
+                    c.setFont("Helvetica", 8)
+                    c.drawCentredString(center_x, current_y - row_height/2 + 4, str(cell))
+            current_y -= row_height
+            if current_y < 2*cm:
+                c.showPage()
+                current_y = 19*cm
+                for i, col in enumerate(columnas):
+                    center_x = x_positions[i] + col_widths[i] / 2
+                    c.setFillColorRGB(0, 0, 0)
+                    c.rect(x_positions[i], current_y, col_widths[i], row_height, fill=1, stroke=0)
+                    c.setFillColorRGB(1, 1, 1)
+                    c.setFont("Helvetica-Bold", 12)
+                    c.drawCentredString(center_x, current_y + row_height/2 - 4, col)
+                current_y -= row_height
+
+        c.showPage()
+        c.save()
+        messagebox.showinfo("PDF generado", f"Se creó el archivo {pdf_filename} en modo horizontal.")
+
+
+
+
+
     def export_table_to_pdf(self):
         data = self.load_data()
         if self.project not in data or not data[self.project]:
@@ -1296,6 +1423,9 @@ class TimeTracker:
         # Obtener fecha de inicio del proyecto
         timestamps = []
         for act, detalles in project_data.items():
+            # Asegurarse de que detalles sea un diccionario
+            if not isinstance(detalles, dict):
+                continue
             ts = detalles.get("timestamp", "")
             try:
                 dt = datetime.datetime.fromisoformat(ts)
@@ -1334,6 +1464,9 @@ class TimeTracker:
         # Agrupar actividades por el campo "actividad"
         grupos = {}
         for key, detalles in project_data.items():
+            # Omitir entradas para "Alumno", "Profesor" o cuando detalles no sea un diccionario
+            if key in ("Alumno", "Profesor") or not isinstance(detalles, dict):
+                continue
             act = detalles.get("actividad", "Desconocido")
             activo = detalles.get("activo", 0) + detalles.get("extra", 0)
             inactivo = detalles.get("inactivo", 0)
@@ -1368,7 +1501,6 @@ class TimeTracker:
         image_height = image_width * 0.75
         c.drawImage(image_reader, 50, y - image_height, width=image_width, height=image_height)
         c.showPage()
-
 
         # -- Página 2: Gráfica de Pastel --
         y = height - 50
@@ -1432,6 +1564,8 @@ class TimeTracker:
         c.setFont("Helvetica-Bold", 10)
         max_fecha_width = c.stringWidth("Fecha", "Helvetica-Bold", 10)
         for act, detalles in project_data.items():
+            if not isinstance(detalles, dict):
+                continue
             try:
                 dt = datetime.datetime.fromisoformat(detalles.get("timestamp", ""))
                 weekday_dt = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"][dt.weekday()]
@@ -1471,15 +1605,26 @@ class TimeTracker:
         line_height = 10
 
         for j, (actividad, detalles) in enumerate(project_data.items()):
+            # Verificar que 'detalles' sea un diccionario y omitir claves no deseadas
+            if not isinstance(detalles, dict):
+                continue
+            if actividad.strip() in ("Alumno", "Profesor"):
+                continue
+
+            # Procesar timestamp de inicio
+            ts = detalles.get("timestamp", "")
             try:
-                creation_dt = datetime.datetime.fromisoformat(detalles.get("timestamp", ""))
+                creation_dt = datetime.datetime.fromisoformat(ts)
                 weekday_dt = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"][creation_dt.weekday()]
-                month_dt = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][creation_dt.month - 1]
+                month_dt = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+                            "septiembre", "octubre", "noviembre", "diciembre"][creation_dt.month - 1]
                 fecha = f"{weekday_dt} {creation_dt.day} de {month_dt} de {creation_dt.year}"
                 inicio = creation_dt.strftime("%H:%M:%S")
             except Exception:
-                fecha = detalles.get("timestamp", "")
+                fecha = ts
                 inicio = ""
+
+            # Procesar timestamp de detención
             stop_ts = detalles.get("timestamp_detener", "")
             try:
                 stop_dt = datetime.datetime.fromisoformat(stop_ts)
@@ -1489,7 +1634,6 @@ class TimeTracker:
 
             interrupcion = str(detalles.get("inactivo", 0))
             a_tiempo = str(detalles.get("activo", 0) + detalles.get("extra", 0))
-            # Usar solo el campo "actividad" para mostrar el nombre
             real_activity = detalles.get("actividad", "")
             comment = detalles.get("comentario", "")
             comment_lines = wrap_text(comment, col_widths[6] - 4, c, "Helvetica", 10)
@@ -1497,8 +1641,10 @@ class TimeTracker:
             extra_padding = 8
             current_row_height = max(row_height_default, num_comment_lines * line_height) + extra_padding
 
-            # Reemplazamos la variable 'actividad' por 'real_activity'
+            # Creamos la fila (usamos real_activity en lugar de actividad para evitar posibles conflictos)
             row = [fecha, inicio, fin, interrupcion, a_tiempo, real_activity]
+
+            # Dibujar celdas de la fila (para las columnas 0 a 5)
             for i, cell in enumerate(row):
                 center_x = x_positions[i] + col_widths[i] / 2
                 text_y = y - current_row_height / 2 - 3
@@ -1509,14 +1655,16 @@ class TimeTracker:
                 if j > 0:
                     c.line(x_positions[i], y, x_positions[i] + col_widths[i], y)
                 c.line(x_positions[i], y - current_row_height, x_positions[i] + col_widths[i], y - current_row_height)
+
+            # Dibujar la columna de "Comentarios"
             center_x_comment = x_positions[6] + col_widths[6] / 2
             total_text_height = num_comment_lines * line_height
             extra_top_margin = 5
-            text_y = y - extra_top_margin - ((current_row_height - extra_padding - total_text_height) / 2 + line_height/2)
-
+            text_y = y - extra_top_margin - ((current_row_height - extra_padding - total_text_height) / 2 + line_height / 2)
             for line in comment_lines:
                 c.drawCentredString(center_x_comment, text_y, line)
                 text_y -= line_height
+
             c.setLineWidth(1)
             c.setStrokeColorRGB(0, 0, 0)
             if j > 0:
